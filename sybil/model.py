@@ -252,6 +252,7 @@ class Sybil:
             raise ValueError("Expected either a Serie object or list of Serie objects.")
 
         scores: List[List[float]] = []
+        attentions: List[List[float]] = []
         for serie in series:
             if not isinstance(serie, Serie):
                 raise ValueError("Expected a list of Serie objects.")
@@ -263,9 +264,10 @@ class Sybil:
             with torch.no_grad():
                 out = model(volume)
                 score = out["logit"].sigmoid().squeeze(0).cpu().numpy()
-                scores.append(score)
-
-        return np.stack(scores)
+                scores.append(score)        
+                atten=out['image_attention_1'].sigmoid().squeeze(0).cpu().numpy()   ###hua added for ouput attention
+                attentions.append(atten)
+        return np.stack(scores),np.stack(attentions)
 
     def predict(self, series: Union[Serie, List[Serie]]) -> Prediction:
         """Run predictions over the given serie(s) and ensemble
